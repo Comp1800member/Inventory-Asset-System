@@ -26,6 +26,8 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+      RELOAD: "true"
     volumes:
       - ./backend:/app
 
@@ -38,6 +40,7 @@ services:
       - backend
     environment:
       VITE_API_URL: http://localhost:8000
+    command: ["npm", "run", "dev"]
     volumes:
       - ./frontend:/app
       - /app/node_modules
