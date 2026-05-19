@@ -70,7 +70,7 @@ export interface CurrentInventory {
   warehouse_id: number;
   sku: string;
   name: string;
-  quantity: number;
+  current_quantity: number;
 }
 
 export interface TopMovedItem {
@@ -95,7 +95,9 @@ export interface Analytics {
     total_inbound: number;
     total_outbound: number;
     total_adjustment: number;
+    total_movements: number;
   };
+  daily_activity: { date: string; movement_count: number }[];
 }
 
 export const api = {

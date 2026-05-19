@@ -1,4 +1,5 @@
-from sqlalchemy import func, case
+from datetime import datetime, timedelta, timezone
+from sqlalchemy import Date, cast, func, case
 from sqlalchemy.orm import Session
 from app.models.inventory_movement import InventoryMovement, MovementType
 from app.models.inventory_item import InventoryItem
@@ -6,6 +7,7 @@ from app.models.warehouse import Warehouse
 from app.schemas.inventory import (
     AnalyticsRead,
     CurrentInventoryRead,
+    DailyActivity,
     TopMovedItem,
     TopWarehouse,
     VolumeBreakdown,
@@ -31,7 +33,7 @@ def _inventory_query(db: Session):
             InventoryMovement.warehouse_id,
             InventoryItem.sku,
             InventoryItem.name,
-            _qty_agg().label("quantity"),
+            _qty_agg().label("current_quantity"),
         )
         .join(InventoryItem, InventoryItem.id == InventoryMovement.inventory_item_id)
         .group_by(
@@ -95,7 +97,21 @@ def get_analytics(db: Session) -> AnalyticsRead:
         func.coalesce(func.sum(
             case((InventoryMovement.movement_type == MovementType.ADJUSTMENT, InventoryMovement.quantity), else_=0)
         ), 0).label("total_adjustment"),
+        func.count(InventoryMovement.id).label("total_movements"),
     ).one()
+
+    # Movement counts grouped by day for the last 7 days
+    cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+    daily = (
+        db.query(
+            cast(InventoryMovement.created_at, Date).label("date"),
+            func.count(InventoryMovement.id).label("movement_count"),
+        )
+        .filter(InventoryMovement.created_at >= cutoff)
+        .group_by(cast(InventoryMovement.created_at, Date))
+        .order_by(cast(InventoryMovement.created_at, Date))
+        .all()
+    )
 
     return AnalyticsRead(
         top_moved_items=[TopMovedItem(**r._asdict()) for r in top_items],
@@ -104,5 +120,7 @@ def get_analytics(db: Session) -> AnalyticsRead:
             total_inbound=int(volume.total_inbound),
             total_outbound=int(volume.total_outbound),
             total_adjustment=int(volume.total_adjustment),
+            total_movements=int(volume.total_movements),
         ),
+        daily_activity=[DailyActivity(date=r.date, movement_count=r.movement_count) for r in daily],
     )
