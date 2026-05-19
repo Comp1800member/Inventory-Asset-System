@@ -4,6 +4,7 @@ import ItemsPage from './pages/ItemsPage';
 import WarehousesPage from './pages/WarehousesPage';
 import MovementsPage from './pages/MovementsPage';
 import CreateMovementPage from './pages/CreateMovementPage';
+import DashboardPage from './pages/DashboardPage';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/warehouses" element={<WarehousesPage />} />
           <Route path="/movements" element={<MovementsPage />} />
           <Route path="/movements/new" element={<CreateMovementPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
       </main>
     </BrowserRouter>

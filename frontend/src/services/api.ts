@@ -65,6 +65,39 @@ export interface StockResult {
   stock: number;
 }
 
+export interface CurrentInventory {
+  item_id: number;
+  warehouse_id: number;
+  sku: string;
+  name: string;
+  quantity: number;
+}
+
+export interface TopMovedItem {
+  item_id: number;
+  sku: string;
+  name: string;
+  movement_count: number;
+  total_quantity: number;
+}
+
+export interface TopWarehouse {
+  warehouse_id: number;
+  warehouse_name: string;
+  movement_count: number;
+  total_quantity: number;
+}
+
+export interface Analytics {
+  top_moved_items: TopMovedItem[];
+  top_warehouses: TopWarehouse[];
+  volume: {
+    total_inbound: number;
+    total_outbound: number;
+    total_adjustment: number;
+  };
+}
+
 export const api = {
   users: {
     list: () => get<User[]>('/users/'),
@@ -103,5 +136,11 @@ export const api = {
     }) => post<InventoryMovement>('/movements/', data),
     getStock: (item_id: number, warehouse_id: number) =>
       get<StockResult>(`/movements/stock?item_id=${item_id}&warehouse_id=${warehouse_id}`),
+  },
+  inventory: {
+    current: () => get<CurrentInventory[]>('/inventory/current'),
+    lowStock: (threshold = 10) =>
+      get<CurrentInventory[]>(`/inventory/low-stock?threshold=${threshold}`),
+    analytics: () => get<Analytics>('/inventory/analytics'),
   },
 };

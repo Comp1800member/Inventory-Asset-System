@@ -7,6 +7,7 @@ export default function Navbar() {
       <NavLink to="/items">Items</NavLink>
       <NavLink to="/warehouses">Warehouses</NavLink>
       <NavLink to="/movements">Movements</NavLink>
+      <NavLink to="/dashboard">Dashboard</NavLink>
       <NavLink to="/movements/new" className="record-btn">+ Record</NavLink>
     </nav>
   );
