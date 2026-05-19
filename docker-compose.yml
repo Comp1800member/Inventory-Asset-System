@@ -26,7 +26,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,http://localhost,http://127.0.0.1"
+      ALLOWED_ORIGINS: "http://${API_HOST:-localhost}:5173,http://${API_HOST:-localhost}"
       RELOAD: "true"
     volumes:
       - ./backend:/app
@@ -35,7 +35,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: http://localhost:8000
+        VITE_API_URL: http://${API_HOST:-localhost}:8000
     restart: unless-stopped
     ports:
       - "5173:80"
